@@ -11,7 +11,9 @@ This module supports authenticating as a GitHub App or with a GitHub personal ac
 In your GitHub organization go to Settings -> GitHub Apps (within Developer settings). Click New GitHub App.
 
 For GitHub App name: ${your organization}-codepipeline (Must be unique.)
+
 Description: This GitHub App updates the commit status when CodePipeline runs.
+
 Homepage: https://github.com/rearc/terraform-aws-codepipeline-status
 
 ![Register App](/images/register_app.png)
@@ -39,8 +41,11 @@ Then go to Install App and Install in your organization. From there take note of
 Login to the AWS Console, go to Systems Manager, go to Parameter Store and click Create parameter.
 
 Name: codepipeline-status-key
+
 Description: GitHub App private key for codepipeline-status-reporter Lambda function
+
 Type: SecureString
+
 Value: Paste the contents of the private key generated for the GitHub App.
 
 ![Create Parameter](/images/parameter.png)
