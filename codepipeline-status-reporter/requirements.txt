@@ -1,2 +1,5 @@
-pyjwt
-cryptography
+cffi==1.14.0
+cryptography==2.9.2
+pycparser==2.20
+PyJWT==1.7.1
+six==1.14.0

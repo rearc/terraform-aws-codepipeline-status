@@ -3,7 +3,6 @@ locals {
   github_parameter = var.github_app_private_key != "" ? var.github_app_private_key : var.github_personal_access_token
 }
 
-
 resource "aws_cloudwatch_event_rule" "codepipeline_updates" {
   name        = "codepipeline-updates"
   description = "Captures CodePipeline action execution state changes."
@@ -48,14 +47,46 @@ data "archive_file" "reporter_package" {
   output_path = "${path.module}/codepipeline-status-reporter.zip"
 }
 
+resource "null_resource" "pip_install" {
+  triggers = {
+    requirements_sha1 = "${sha1(file("${path.module}/codepipeline-status-reporter/requirements.txt"))}"
+  }
+
+  provisioner "local-exec" {
+    command = "pip3 install -r ${path.module}/codepipeline-status-reporter/requirements.txt --platform manylinux1_x86_64 --only-binary=:all: --python-version 37 --abi cp37m -vvv -t ${path.module}/codepipeline-status-reporter-dependencies/python/lib/python3.7/site-packages"
+  }
+}
+
+data "archive_file" "dependencies_package" {
+  type        = "zip"
+  source_dir  = "${path.module}/codepipeline-status-reporter-dependencies"
+  output_path = "${path.module}/codepipeline-status-reporter-dependencies.zip"
+
+  depends_on = [
+    null_resource.pip_install,
+  ]
+}
+
+resource "aws_lambda_layer_version" "lambda_layer" {
+  filename            = "${path.module}/codepipeline-status-reporter-dependencies.zip"
+  layer_name          = "codepipeline-status-reporter-dependencies"
+  description         = "Provides pyjwt and cryptography from pip."
+  compatible_runtimes = ["python3.7"]
+
+  depends_on = [
+    data.archive_file.dependencies_package,
+  ]
+}
+
 resource "aws_lambda_function" "codepipeline_status_reporter" {
   filename         = "${path.module}/codepipeline-status-reporter.zip"
   function_name    = "codepipeline-status-reporter"
   role             = aws_iam_role.codepipeline_status_reporter.arn
-  runtime          = "python3.8"
+  runtime          = "python3.7"
   source_code_hash = data.archive_file.reporter_package.output_base64sha256
   handler          = "lambda_function.handler"
   timeout          = 10
+  layers           = ["${aws_lambda_layer_version.lambda_layer.arn}"]
 
   environment {
     variables = {
@@ -120,6 +151,15 @@ resource "aws_iam_policy" "codepipeline_status_reporter" {
         "codepipeline:GetPipeline"
       ],
       "Resource": "*",
+      "Effect": "Allow"
+    },
+    {
+      "Action": [
+        "lambda:GetLayerVersion"
+      ],
+      "Resource": [
+        "${aws_lambda_layer_version.lambda_layer.arn}"
+      ],
       "Effect": "Allow"
     },
     {

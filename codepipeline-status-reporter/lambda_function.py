@@ -46,6 +46,7 @@ def construct_payload(pipeline_name: str, pipeline_state: str, pipeline_stage: s
     return payload
 
 def handler(event: dict, context: dict):
+    print(event)
     # Extract relevant details from event
     region = event["region"]
     pipeline_name = event["detail"]["pipeline"]
@@ -61,6 +62,11 @@ def handler(event: dict, context: dict):
     repo = configuration["Repo"]
     branch = configuration["Branch"]
     
+    # Discard Source stage events
+    if pipeline_stage == "Source":
+        print("Discarding Source stage events")
+        return
+    
     # Get revision sha from CodePipeline API
     pipeline_execution = codepipeline.get_pipeline_execution(
         pipelineName=pipeline_name, pipelineExecutionId=execution_id
@@ -72,6 +78,7 @@ def handler(event: dict, context: dict):
     
     # Don't update status api unless it's my branch for now
     if "mwkaufman" not in branch:
+        print("Discarding non-whitelisted branch events")
         return
 
     ssm = boto3.client('ssm')

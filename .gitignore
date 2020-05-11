@@ -27,3 +27,13 @@ override.tf.json
 
 # Include tfplan files to ignore the plan output of command: terraform plan -out=tfplan
 # example: *tfplan*
+
+# Lambda deployment package
+codepipeline-status-reporter.zip
+
+# pip dependencies for Lambda layer
+codepipeline-status-reporter-dependencies/
+codepipeline-status-reporter-dependencies.zip
+
+# MacOS UI file
+**/.DS_Store
