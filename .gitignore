@@ -37,3 +37,6 @@ codepipeline-status-reporter-dependencies.zip
 
 # MacOS UI file
 **/.DS_Store
+
+# Useful test events are specific to an AWS account
+test-events/
