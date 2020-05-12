@@ -9,6 +9,7 @@ github_auth_type = os.environ['GITHUB_AUTH_TYPE']
 github_parameter = os.environ['GITHUB_PARAMETER']
 github_app_id = os.environ['GITHUB_APP_ID']
 github_app_install_id = os.environ['GITHUB_APP_INSTALL_ID']
+branch_whitelist = os.environ['BRANCH_WHITELIST']
 github_base = "https://api.github.com"
 
 # Returns a temporary access token for GitHub App
@@ -62,6 +63,14 @@ def handler(event: dict, context: dict):
     repo = configuration["Repo"]
     branch = configuration["Branch"]
     
+    # Discard non-whitelisted branches if set
+    if branch_whitelist:
+        print("Branch whitelist: " + branch_whitelist)
+        whitelisted_branches = branch_whitelist.split(",")
+        if (repo + "/" + branch) not in whitelisted_branches:
+            print("Discarding non-whitelisted branch event for " + repo + "/" + branch)
+            return
+    
     # Discard Source stage events
     if pipeline_stage == "Source":
         print("Discarding Source stage events")
@@ -75,11 +84,6 @@ def handler(event: dict, context: dict):
     revision_url = revision["revisionUrl"]
     # revision_url has the format https://github.com/:owner/:repo/commit/:sha
     sha = revision_url.rsplit("/",4)[4]
-    
-    # Don't update status api unless it's my branch for now
-    if "mwkaufman" not in branch:
-        print("Discarding non-whitelisted branch events")
-        return
 
     ssm = boto3.client('ssm')
     response = ssm.get_parameter(Name=github_parameter,WithDecryption=True)

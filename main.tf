@@ -94,6 +94,7 @@ resource "aws_lambda_function" "codepipeline_status_reporter" {
       GITHUB_PARAMETER      = local.github_parameter
       GITHUB_APP_ID         = var.github_app_id
       GITHUB_APP_INSTALL_ID = var.github_app_install_id
+      BRANCH_WHITELIST      = var.branch_whitelist
     }
   }
 

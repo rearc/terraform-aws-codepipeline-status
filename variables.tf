@@ -1,6 +1,6 @@
 variable "github_app_private_key" {
   type        = string
-  description = "Name of GitHub App private key in Parameter Store, e.g. github-status-key"
+  description = "Name of GitHub App private key in Parameter Store, e.g. codepipeline-status-key"
   default     = ""
 }
 
@@ -22,3 +22,8 @@ variable "github_personal_access_token" {
   default     = ""
 }
 
+variable "branch_whitelist" {
+  type        = string
+  description = "Comma-delimited list of repository/branch to update status on, e.g. terraform-aws-codepipeline-status/master"
+  default     = ""  
+}
