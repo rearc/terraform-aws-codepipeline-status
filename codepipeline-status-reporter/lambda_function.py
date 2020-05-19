@@ -16,7 +16,7 @@ github_base = "https://api.github.com"
 def get_access_token(secret_value: str):
     iat = int(time.time())
     exp = iat + 600
-    encoded_jwt = jwt.encode({'iat': iat, 'exp': exp, 'iss': github_app_id}, token, algorithm='RS256')
+    encoded_jwt = jwt.encode({'iat': iat, 'exp': exp, 'iss': github_app_id}, secret_value, algorithm='RS256')
     github_access_token_url = github_base + "/app/installations/{github_app_install_id}/access_tokens"
     url = github_access_token_url.format(github_app_install_id=github_app_install_id)
     headers = {
