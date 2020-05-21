@@ -49,6 +49,7 @@ data "archive_file" "reporter_package" {
 
 resource "null_resource" "pip_install" {
   triggers = {
+    file_exists = "${fileexists("${path.module}/codepipeline-status-reporter-dependencies/six.py")}"
     requirements_sha1 = "${sha1(file("${path.module}/codepipeline-status-reporter/requirements.txt"))}"
   }
 
